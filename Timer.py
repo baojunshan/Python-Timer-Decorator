@@ -6,7 +6,7 @@
 import time
 import inspect
 
-from functools import wraps, partial
+from functools import wraps, partial, update_wrapper
 
 class NoInstances(type):
     def __call__(self, *args, **kwargs):
@@ -67,7 +67,9 @@ def timer(obj):
             x = orig_getattribute(self, name)
             # print(x.__name__)
             if callable(x):
-                return partial(Timer.time_this, x)
+                ret_func = partial(Timer.time_this, x)
+                update_wrapper(ret_func, x)
+                return ret_func
             else:
                 return x
         obj.__getattribute__ = new_getattribute
@@ -124,5 +126,10 @@ if __name__ == "__main__":
     t2 = Tester2()
     t2.sleeptest1()
     Tester2.sleeptest2()
+
+    Timer.show()
+
+    print(t1.sleeptest1.__name__)
+    print(t2.sleeptest1.__name__)
 
     Timer.show()
