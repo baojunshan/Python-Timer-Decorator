@@ -55,17 +55,14 @@ class Timer(metaclass=NoInstances):
 
 def timer(obj):
     if inspect.isfunction(obj):
-        # obj_type = 'function'
         @wraps(obj)
         def wrapper(*args, **kwargs):
             return Timer.time_this(obj, *args, **kwargs)
         return wrapper
     elif inspect.isclass(obj):
-        # obj_type = 'class'
         orig_getattribute = obj.__getattribute__
         def new_getattribute(self, name):
             x = orig_getattribute(self, name)
-            # print(x.__name__)
             if callable(x):
                 ret_func = partial(Timer.time_this, x)
                 update_wrapper(ret_func, x)
@@ -76,60 +73,3 @@ def timer(obj):
         return obj
     else:
         raise Exception("Invalid Decorate type!", obj)
-
-
-@timer
-def tmp():
-    time.sleep(1)
-    print(11111)
-
-
-@timer
-def tmp1():
-    time.sleep(2)
-
-class Tester1:
-    @timer
-    def sleeptest1(self):
-        time.sleep(2)
-
-    @staticmethod
-    @timer
-    def sleeptest2():
-        time.sleep(0.5)
-
-@timer
-class Tester2:
-    def __init__(self):
-        print("Initializing...")
-        super().__init__()
-        self.x = 0
-
-    def sleeptest1(self):
-        time.sleep(1)
-
-    @staticmethod
-    def sleeptest2():
-        time.sleep(2)
-
-
-if __name__ == "__main__":
-
-    tmp()
-    tmp1()
-    tmp1()
-
-    t1 = Tester1()
-    t1.sleeptest1()
-    Tester1.sleeptest2()
-
-    t2 = Tester2()
-    t2.sleeptest1()
-    Tester2.sleeptest2()
-
-    Timer.show()
-
-    print(t1.sleeptest1.__name__)
-    print(t2.sleeptest1.__name__)
-
-    Timer.show()
